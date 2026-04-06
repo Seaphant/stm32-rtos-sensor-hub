@@ -45,8 +45,8 @@ static void boot_print_reason(void)
         reason = "WWDG";
     } else if ((csr & RCC_CSR_SFTRSTF) != 0U) {
         reason = "SFTR";
-    } else if ((csr & RCC_CSR_PORRSTF) != 0U) {
-        reason = "POR";
+    } else if ((csr & RCC_CSR_BORRSTF) != 0U) {
+        reason = "BOR";
     } else if ((csr & RCC_CSR_PINRSTF) != 0U) {
         reason = "PIN";
     }
