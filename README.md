@@ -1,68 +1,56 @@
 # stm32-rtos-sensor-hub
 
-Bare-metal **C** firmware for **STM32G474RET6** on **NUCLEO-G474RE** with **FreeRTOS**: **I2C1** (PB8/PB9) bring-up toward **LSM6DSO**, **TMP117**, and **INA219**; **LPUART1** (ST-Link VCP) for **CLI** and text **telemetry**; compact **fault** records in RAM.
+Embedded C firmware for the **NUCLEO-G474RE** (**STM32G474RET6**) using **FreeRTOS**, **LPUART1** text I/O, and **I2C1** sensor-bus bring-up toward **LSM6DSO**, **TMP117**, and **INA219**. The repo includes both the authored application layers and the checked-in Cube-style project files under `firmware/`.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## What this is
+## Project summary
 
-Solo embedded portfolio work: RTOS task split, UART protocol, fault bookkeeping, and clear boundaries between Cube HAL and application code—no cloud, GUI, or wireless stacks.
+This is a small embedded systems portfolio project focused on the part of firmware work that matters early on: MCU bring-up, task partitioning, UART observability, RTOS integration, and a clean boundary between generated HAL code and handwritten product code.
 
-## v0.1 scope
+## Implemented now
 
-- Hand-written tree under `firmware/{App,Services,modules,Common}` (see [firmware/README.md](firmware/README.md)).
-- **STM32CubeIDE** output (`Core/`, HAL **`Drivers/`**, FreeRTOS, `.ioc`, linker script) is added later **under `firmware/`** (see [docs/cube-integration.md](docs/cube-integration.md)).
-- **BOOT** line, **LD2** heartbeat, **CLI** (`help`, `status`, `start`, `stop`), **stub `TLM`** at **~10 Hz** in **RUN**.
-- **No** UART DMA, **no** binary telemetry, **no** CMake build in v0.1.
+- Checked-in STM32 project tree under `firmware/`, including `Core/`, `Drivers/`, `Middlewares/`, `STM32G474RETX_FLASH.ld`, `sensor-hub.ioc`, and [`firmware/Makefile`](firmware/Makefile)
+- Handwritten application layers under `firmware/{App,Services,modules,Common}`
+- `app_init_early()` wired into `main.c` after GPIO/UART/I2C init and before the scheduler
+- `app_rtos_create_tasks()` wired into `MX_FREERTOS_Init()` to create the `app`, `tlm`, and `cli` tasks
+- `printf` / `LOG_LINE` retargeted to **LPUART1** over the ST-Link virtual COM port
+- `sensor_hub` stub path that publishes deterministic sample data while real device drivers are still pending
+- RAM-backed fault log for queue drops and CLI line overflow
 
-## Hardware
+## Hardware platform
 
-| Item | Role |
-|------|------|
-| **NUCLEO-G474RE** | **STM32G474RET6**, ST-Link, **LPUART1** VCP |
-| **LSM6DSO** | IMU (post–v0.1 driver work) |
-| **TMP117** | Temperature |
-| **INA219** | Bus voltage / current |
+| Item | Details |
+|------|---------|
+| Board | ST **NUCLEO-G474RE** |
+| MCU | **STM32G474RET6** |
+| UART | **LPUART1** on ST-Link VCP, **115200 8N1** |
+| I2C | **I2C1** on **PB8/PB9** |
+| LED | **LD2** on **PA5** in the checked-in Cube config |
+| Planned sensors | **LSM6DSO**, **TMP117**, **INA219** |
 
-See [hardware/BOM.md](hardware/BOM.md), [hardware/wiring.md](hardware/wiring.md), [docs/pinout.md](docs/pinout.md).
+Supporting notes: [hardware/BOM.md](hardware/BOM.md), [hardware/wiring.md](hardware/wiring.md), [docs/pinout.md](docs/pinout.md)
 
 ## Architecture
 
-- **App** — `app_init_early()`, `app_rtos_create_tasks()`, **RUN**/**IDLE**, LED, sampling cadence.
-- **Services** — `telemetry` (queue + **`TLM`**), `cli` (line-oriented **LPUART1**), `fault_mgr` (ring buffer).
-- **modules** — `sensor_hub` builds one **`sample_frame_t`** (**stub** through v0.1).
-- **Common** — `status_t`, `log.h` (`printf`; retarget to **LPUART1** in Cube).
+- **App**: mode control, heartbeat timing, task creation, boot banner, sampling cadence
+- **Services**: CLI, telemetry queue/formatting, fault logging
+- **modules**: sensor aggregation entry point (`sensor_hub`) for future device-driver work
+- **Common**: shared status and logging utilities
 
-Diagram: [diagrams/architecture.txt](diagrams/architecture.txt). Details: [docs/architecture.md](docs/architecture.md).
+Details: [docs/architecture.md](docs/architecture.md) and [diagrams/architecture.txt](diagrams/architecture.txt)
 
-## Repo layout
+## Runtime behavior
 
-```text
-docs/            Spec, protocol, tests, pinout, roadmap, Cube integration
-hardware/        BOM, wiring
-firmware/        Hand-written modules + (later) Cube output
-diagrams/        ASCII architecture
-scripts/         UART smoke (later)
-tests/           Test notes (see tests/README.md)
-```
+On reset, the firmware initializes GPIO, LPUART1, and I2C1, prints a single `BOOT` line, and starts FreeRTOS. The LED heartbeat toggles every 500 ms. The system starts in `IDLE`; `start` switches to `RUN` and emits stub `TLM` lines at roughly 10 Hz, while `stop` returns to `IDLE`.
 
-## Build / flash (after Cube import)
-
-1. Open the **STM32CubeIDE** project under **`firmware/`**.
-2. Add include paths for **`App`**, **`Services`**, **`modules`**, **`Common`** ([firmware/README.md](firmware/README.md)).
-3. In Cube: **FreeRTOS**, **LPUART1** @ 115200 8N1, **I2C1** on **PB8**/**PB9**, **PE8** as **LD2** output.
-4. Wire `app_init_early()` and `app_rtos_create_tasks()` per [docs/cube-integration.md](docs/cube-integration.md).
-5. Flash **NUCLEO-G474RE**; serial console **115200 8N1**.
-
-## UART examples
-
-**Boot**
+Example boot line:
 
 ```text
-BOOT mcu=STM32G474 t_ms=0 reason=POR fw=0.1.0 cal=0
+BOOT mcu=STM32G474 t_ms=0 reason=BOR fw=0.1.0 cal=0
 ```
 
-**CLI**
+Example CLI session:
 
 ```text
 help
@@ -71,35 +59,49 @@ start
 OK mode=RUN
 ```
 
-**Telemetry (stub, RUN)**
+Example telemetry line:
 
 ```text
 TLM seq=0 t_ms=120 imu_ax_mg=0 imu_ay_mg=0 imu_az_mg=1000 gx_mdps=0 gy_mdps=0 gz_mdps=0 tmp_c=23.681 vbus_mv=3300 i_ma=0
 ```
 
+## Current status
+
+- Current baseline: committed Cube/HAL/FreeRTOS project plus working application/task wiring
+- Validation evidence in the repo: source layout, `.ioc`, linker script, Makefile, UART protocol docs, and a manual smoke-test plan
+- Still pending: real LSM6DSO / TMP117 / INA219 drivers, WHO_AM_I checks, fault-on-wire reporting, watchdog policy, and calibration persistence
+
+## Build / flash
+
+This polish pass did **not** rebuild or reflash the project. The checked-in repo supports both of these workflows:
+
+1. Import [`firmware/sensor-hub.ioc`](firmware/sensor-hub.ioc) into **STM32CubeIDE** and build there.
+2. Or build from the command line:
+
+```text
+cd firmware
+make all
+make flash
+```
+
+`make flash` expects `st-flash` to be installed and a board connected. Serial monitoring uses the ST-Link VCP at **115200 8N1**.
+
+## Why this project matters
+
+For embedded roles, this repo shows board-focused firmware work rather than app-layer glue: clock and peripheral setup, RTOS task orchestration, HAL integration, serial debugging, memory-conscious C code, and an incremental path from bring-up to real sensor drivers.
+
 ## Docs index
 
 | File | Purpose |
 |------|---------|
-| [docs/technical-spec.md](docs/technical-spec.md) | Engineering spec |
-| [docs/architecture.md](docs/architecture.md) | Layers and tasks |
-| [docs/protocol.md](docs/protocol.md) | `BOOT`, `TLM`, CLI |
-| [docs/cube-integration.md](docs/cube-integration.md) | Cube hooks and safe edits |
-| [docs/test-plan.md](docs/test-plan.md) | v0.1 checks |
-| [docs/pinout.md](docs/pinout.md) | Pin assignment |
-| [docs/roadmap.md](docs/roadmap.md) | Milestones |
-
-## Roadmap
-
-| Tag | Content |
-|-----|---------|
-| **v0.1** | Docs + skeleton C + Cube project boots: **BOOT**, LD2, CLI, stub **`TLM`** |
-| **v1.0** | Real I2C sensors, **`FLT`** lines, IWDG policy, flash calibration |
-
-## Author
-
-**Seaphant**
+| [docs/technical-spec.md](docs/technical-spec.md) | Technical scope and current baseline |
+| [docs/architecture.md](docs/architecture.md) | Layering and data flow |
+| [docs/protocol.md](docs/protocol.md) | `BOOT`, `TLM`, and CLI format |
+| [docs/cube-integration.md](docs/cube-integration.md) | Regeneration and safe edit guidance |
+| [docs/test-plan.md](docs/test-plan.md) | Manual target-side smoke checks |
+| [docs/pinout.md](docs/pinout.md) | Pin assignments from the checked-in `.ioc` |
+| [docs/roadmap.md](docs/roadmap.md) | Follow-on milestones |
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).

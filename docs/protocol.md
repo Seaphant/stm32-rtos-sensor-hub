@@ -1,4 +1,4 @@
-# UART protocol — v0.1
+# UART protocol - v0.1
 
 ## Transport
 
@@ -10,13 +10,13 @@
 ## `BOOT` (once per reset)
 
 ```text
-BOOT mcu=STM32G474 t_ms=<u32> reason=<POR|PIN|IWDG|WWDG|SFTR|OTHER> fw=<semver> cal=<0|1>
+BOOT mcu=STM32G474 t_ms=<u32> reason=<BOR|PIN|IWDG|WWDG|SFTR|OTHER> fw=<semver> cal=<0|1>
 ```
 
 Example:
 
 ```text
-BOOT mcu=STM32G474 t_ms=0 reason=POR fw=0.1.0 cal=0
+BOOT mcu=STM32G474 t_ms=0 reason=BOR fw=0.1.0 cal=0
 ```
 
 ## `TLM`

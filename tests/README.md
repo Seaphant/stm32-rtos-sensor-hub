@@ -2,7 +2,7 @@
 
 ## v0.1
 
-Manual procedures only; follow [docs/test-plan.md](../docs/test-plan.md) (**BOOT**, **CLI**, **stub `TLM`** at ~**10 Hz** in **RUN**). No committed automated harness.
+Manual procedures only; follow [docs/test-plan.md](../docs/test-plan.md) for the target-side smoke checks (**BOOT**, **CLI**, **stub `TLM`** at ~**10 Hz** in **RUN**). No committed automated harness yet.
 
 ## Host-side (optional, later)
 
@@ -14,4 +14,4 @@ On-device checks (manual or a lightweight framework) still map to [docs/test-pla
 
 ## Policy
 
-Do not commit large UART captures; use **`logs/`** (gitignored).
+Do not commit large UART captures; use **`logs/`** (gitignored) for local validation notes and serial dumps.

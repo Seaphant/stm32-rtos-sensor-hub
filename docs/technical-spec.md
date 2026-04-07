@@ -1,8 +1,8 @@
-# Technical specification — v0.1
+# Technical specification - v0.1
 
 ## Purpose
 
-Firmware for **NUCLEO-G474RE** using **FreeRTOS** to decouple **UART I/O**, **telemetry formatting**, and a future **I2C1** sensor path. **v0.1** proves integration: **`BOOT`**, **CLI**, **stub `TLM`**, **LED heartbeat**, and module layout. **v1** replaces sensor stubs with real drivers and adds **IWDG** and **flash calibration**.
+Firmware for **NUCLEO-G474RE** using **FreeRTOS** to separate **UART I/O**, **telemetry formatting**, and a future **I2C1** sensor path. The current baseline proves the bring-up path: committed Cube project files, boot banner, CLI, stub telemetry, LED heartbeat, and a clear split between generated and handwritten code.
 
 ## Target
 
@@ -19,7 +19,7 @@ Firmware for **NUCLEO-G474RE** using **FreeRTOS** to decouple **UART I/O**, **te
 |------------|----------------|
 | **LPUART1** | 115200 8N1, CLI + `printf` output |
 | **I2C1** | PB8 SCL, PB9 SDA, **100 kHz** Standard Mode (init only required in v0.1) |
-| **GPIO PE8** | **LD2** push-pull output |
+| **GPIO PA5** | **LD2** push-pull output |
 
 **Deferred to v1:** IWDG enabled in field configuration, UART `FLT` lines, flash `cal_blob_t`.
 
@@ -40,6 +40,10 @@ Firmware for **NUCLEO-G474RE** using **FreeRTOS** to decouple **UART I/O**, **te
 | `app` | `IDLE+1` | `RUN`/`IDLE` policy, **100 ms** cadence, LED toggle every **5** periods |
 
 **IPC:** FreeRTOS queue of **`sample_frame_t`**, depth **16**. Overflow raises **`FAULT_TLM_QUEUE_DROP`** in **`fault_mgr`**.
+
+## Build baseline
+
+The repo includes both `firmware/sensor-hub.ioc` for STM32CubeIDE and `firmware/Makefile` for command-line builds. This polish pass did not rebuild the firmware, but the checked-in project structure is complete enough to resume from either workflow.
 
 ## Telemetry
 
@@ -62,13 +66,13 @@ Single ASCII line per frame, prefix **`TLM`**. Fields per [protocol.md](protocol
 
 ## Acceptance
 
-- `BOOT` after reset.  
-- LD2 blinks.  
-- CLI verbs work.  
-- ~**10 Hz** `TLM` in `RUN`.
+- `BOOT` after reset
+- LD2 blinks
+- CLI verbs work
+- ~**10 Hz** `TLM` in `RUN`
 
 ## Revision
 
 | Rev | Note |
 |-----|------|
-| 0.1 | v0.1 documentation + skeleton firmware |
+| 0.1 | v0.1 documentation, committed Cube baseline, and stub sensor path |

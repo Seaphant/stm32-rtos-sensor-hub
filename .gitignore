@@ -1,7 +1,12 @@
 # STM32CubeIDE / Eclipse
 .metadata/
 RemoteSystemsTempFiles/
-**/.settings/language.settings.xml
+.project
+.cproject
+.mxproject
+*.launch
+**/.settings/
+**/.externalToolBuilders/
 
 # Build outputs
 **/Debug/

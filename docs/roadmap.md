@@ -2,12 +2,12 @@
 
 ## v0.1
 
-- Documentation set in **`docs/`**, **`hardware/`**, root **`README.md`**.  
-- Hand-written **`firmware/App`**, **`Services`**, **`modules`**, **`Common`**.  
-- **STM32CubeIDE** project under **`firmware/`** (`.ioc`, **`Core/`**, HAL, **FreeRTOS**).  
-- **`BOOT`**, **LD2** heartbeat, **CLI** (`help`, `status`, `start`, `stop`), **stub `TLM`** ~**10 Hz** in **`RUN`**.
+- Documentation set in **`docs/`**, **`hardware/`**, and the root **`README.md`**
+- Hand-written **`firmware/App`**, **`Services`**, **`modules`**, **`Common`**
+- Checked-in Cube project under **`firmware/`** (`sensor-hub.ioc`, **`Core/`**, HAL, **FreeRTOS**, linker script, Makefile)
+- **`BOOT`**, LD2 heartbeat, CLI (`help`, `status`, `start`, `stop`), and stub **`TLM`** at ~**10 Hz** in **`RUN`**
 
-**Out of scope:** DMA UART, binary frames, CMake, on-wire **`FLT`**, IWDG tuning, flash calibration.
+**Out of scope:** DMA UART, binary frames, on-wire **`FLT`**, IWDG tuning, flash calibration.
 
 ## v1.0
 

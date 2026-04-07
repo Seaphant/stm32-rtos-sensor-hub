@@ -1,6 +1,6 @@
-# Pinout — NUCLEO-G474RE (v0.1)
+# Pinout - NUCLEO-G474RE (v0.1)
 
-## LPUART1 — ST-Link VCP (default)
+## LPUART1 - ST-Link VCP (default)
 
 Per ST **UM2505** §6.6.5, VCP uses **LPUART1** unless solder bridges move it to **USART1**.
 
@@ -11,7 +11,7 @@ Per ST **UM2505** §6.6.5, VCP uses **LPUART1** unless solder bridges move it to
 
 Confirm in generated **`main.h`** / **`.ioc`**.
 
-## I2C1 — sensor bus
+## I2C1 - sensor bus
 
 | Function | MCU pin |
 |----------|---------|
@@ -22,7 +22,7 @@ Use **100 kHz** initially. Add **4.7 kΩ** pull-ups to **3.3 V** if a breakout l
 
 ## LD2
 
-Configure **PE8** as **GPIO_Output** (push-pull), user label **LD2**. Match **`APP_LED_*`** in `app.c` if the silk or Cube name differs.
+The checked-in `.ioc` config uses **PA5** as **GPIO_Output** with the label **LD2**. `Core/Inc/main.h` maps this through `APP_LED_GPIO_Port` / `APP_LED_Pin` for the application layer.
 
 ## NVIC
 

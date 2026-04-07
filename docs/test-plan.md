@@ -1,4 +1,4 @@
-# Test plan — v0.1
+# Test plan - v0.1
 
 ## Intent
 
@@ -7,14 +7,14 @@ Verify flash, **UART**, **FreeRTOS** tasks, and protocol strings on **NUCLEO-G47
 ## Environment
 
 - USB to ST-Link; serial terminal **115200 8N1**, local echo off
-- Firmware built in **STM32CubeIDE** after **`firmware/`** integration per [cube-integration.md](cube-integration.md)
+- Firmware built either from the checked-in **`firmware/Makefile`** or from **STM32CubeIDE** using **`firmware/sensor-hub.ioc`**
 
 ## Manual checks
 
 | ID | Step | Pass criterion |
 |----|------|----------------|
 | T1 | Flash **Debug** build | No hard fault; **LD2** toggles |
-| T2 | Reset; watch UART | Exactly one **`BOOT`** line |
+| T2 | Reset; watch UART | Exactly one **`BOOT`** line with a valid reset reason |
 | T3 | Send `help` | `OK commands: help \| status \| start \| stop` |
 | T4 | Send `status` | Line starts with `OK`; `mode=IDLE` |
 | T5 | Send `start` | `OK mode=RUN`; ~10 **`TLM`** lines per second |
@@ -24,8 +24,8 @@ Verify flash, **UART**, **FreeRTOS** tasks, and protocol strings on **NUCLEO-G47
 
 ## Preconditions
 
-- Cube provides **`UART_HandleTypeDef hlpuart1`** and **`I2C_HandleTypeDef hi2c1`**
-- **`app_init_early()`** and **`app_rtos_create_tasks()`** wired per [cube-integration.md](cube-integration.md)
+- Generated project provides **`UART_HandleTypeDef hlpuart1`** and **`I2C_HandleTypeDef hi2c1`**
+- **`app_init_early()`** and **`app_rtos_create_tasks()`** remain wired per [cube-integration.md](cube-integration.md)
 
 ## Post–v0.1
 
@@ -33,4 +33,4 @@ WHO_AM_I per sensor, I2C fault injection, IWDG reset reason, soak logs.
 
 ## Records
 
-Keep UART captures under **`logs/`** (gitignored). Summarize results in release notes (e.g. tag `v0.1.0`).
+Keep UART captures under **`logs/`** (gitignored). Record the observed boot reason, CLI transcript, and `TLM` sample rate when you run the board smoke test.

@@ -19,9 +19,9 @@
 #include "stm32g4xx_hal.h"
 
 #ifndef APP_LED_GPIO_Port
-/** NUCLEO-G474RE: LD2 = PE8 — override if Cube uses different labels. */
-#define APP_LED_GPIO_Port GPIOE
-#define APP_LED_Pin GPIO_PIN_8
+/* Fallback if the generated main.h alias is not present. */
+#define APP_LED_GPIO_Port GPIOA
+#define APP_LED_Pin GPIO_PIN_5
 #endif
 
 static app_state_t s_mode;

@@ -1,22 +1,24 @@
 # STM32CubeIDE integration
 
-Target: **NUCLEO-G474RE**, **STM32G474RET6**, **FreeRTOS**, **LPUART1** @ 115200 8N1, **I2C1** on **PB8**/**PB9**, **PE8** as **LD2**.
+Target: **NUCLEO-G474RE**, **STM32G474RET6**, **FreeRTOS**, **LPUART1** @ 115200 8N1, **I2C1** on **PB8**/**PB9**, **PA5** as **LD2**.
+
+The repo already includes a checked-in baseline generated around `firmware/sensor-hub.ioc`. Use this document when re-importing, regenerating, or checking that hand-written hooks still match the generated project.
 
 ## Call order
 
 ### `app_init_early()`
 
 - **File:** Cube-generated **`Core/Src/main.c`**
-- **Place:** In a **`USER CODE`** section **after** all **`MX_*_Init()`** calls and **before** **`MX_FREERTOS_Init()`** (or before the kernel starts if you initialize FreeRTOS differently).
+- **Place:** In a **`USER CODE`** section **after** all **`MX_*_Init()`** calls and **before** **`MX_FREERTOS_Init()`**.
 - **Purpose:** `fault_mgr`, telemetry queue, CLI, **`sensor_hub`** init; print **`BOOT`**.
 
 ### `app_rtos_create_tasks()`
 
 - **File:** Cube-generated **`Core/Src/freertos.c`**, inside **`MX_FREERTOS_Init()`**
-- **Place:** **`USER CODE`** region **after** Cube creates the CMSIS-RTOS default objects (if any) and **before** `osKernelStart()` runs.
+- **Place:** **`USER CODE`** region **after** Cube creates the CMSIS-RTOS default objects and **before** `osKernelStart()` runs.
 - **Purpose:** Create **`app`**, **`tlm`**, and **`cli`** tasks (`xTaskCreate`).
 
-Do **not** start these application tasks from **`main()`** after the scheduler is already running; create them from **`MX_FREERTOS_Init()`** so FreeRTOS objects exist before **`osKernelStart()`**.
+Do **not** start these application tasks from `main()` after the scheduler is already running; create them from `MX_FREERTOS_Init()` so FreeRTOS objects exist before `osKernelStart()`.
 
 ## Safe edits vs regeneration
 
@@ -28,6 +30,18 @@ Do **not** start these application tasks from **`main()`** after the scheduler i
 | **`.ioc`** | Source of truth for clocks, pins, peripherals, middleware. |
 
 If you must change IRQ priorities or alternate functions, prefer **CubeMX** → regenerate, or use **`USER CODE`** in **`stm32g4xx_hal_msp.c`** / **`stm32g4xx_it.c`** and re-apply after regenerate if Cube overwrites non-user regions.
+
+## Current checked-in baseline
+
+The current `firmware/` tree contains:
+
+- `sensor-hub.ioc`
+- generated `Core/`, `Drivers/`, and `Middlewares/`
+- `STM32G474RETX_FLASH.ld`
+- `Makefile`
+- authored `App/`, `Services/`, `modules/`, and `Common/`
+
+If you regenerate from CubeMX, keep those authored directories intact and re-check the user-code hooks below.
 
 ## Keeping regeneration safe
 
@@ -57,4 +71,4 @@ Cube places STM32 HAL/CMSIS under **`firmware/Drivers/`**. Keep **all** handwrit
 
 ## LD2 pin
 
-Default **LD2** mapping is **PE8**. If your board or Cube label differs, align **`APP_LED_*`** in **`app.c`** with the Cube pin definition.
+The checked-in project maps **LD2** to **PA5** and exports `APP_LED_GPIO_Port` / `APP_LED_Pin` from `Core/Inc/main.h`. If your regenerated project changes that label, keep the alias in `main.h` or update the fallback in `App/app.c`.
