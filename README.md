@@ -17,6 +17,7 @@ This is a small embedded systems portfolio project focused on the part of firmwa
 - `printf` / `LOG_LINE` retargeted to **LPUART1** over the ST-Link virtual COM port
 - `sensor_hub` stub path that publishes deterministic sample data while real device drivers are still pending
 - RAM-backed fault log for queue drops and CLI line overflow
+- After regenerating the Cube project, use [`firmware/PASTE_AFTER_CUBE_GENERATION.txt`](firmware/PASTE_AFTER_CUBE_GENERATION.txt) for the exact `USER CODE` snippets and linker paths
 
 ## Hardware platform
 
