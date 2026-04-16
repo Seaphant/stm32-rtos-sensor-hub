@@ -77,6 +77,14 @@ void app_set_mode(app_state_t mode)
     taskEXIT_CRITICAL();
 }
 
+void app_set_rates(uint16_t imu_hz, uint16_t slow_hz)
+{
+    taskENTER_CRITICAL();
+    s_imu_hz = imu_hz;
+    s_slow_hz = slow_hz;
+    taskEXIT_CRITICAL();
+}
+
 void app_get_status(app_status_t *out)
 {
     if (!out) {

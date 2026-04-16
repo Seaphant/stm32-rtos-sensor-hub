@@ -39,10 +39,12 @@ TLM seq=7 t_ms=812 imu_ax_mg=0 imu_ay_mg=0 imu_az_mg=1000 gx_mdps=0 gy_mdps=0 gz
 
 | Input | Output |
 |-------|--------|
-| `help` | `OK commands: help \| status \| start \| stop` |
-| `status` | `OK uptime_ms=<u32> mode=<IDLE\|RUN\|CAL> imu_hz=<u16> slow_hz=<u16> last_sample_ms=<u32> faults=<u32> cal=<0\|1>` |
+| `help` | `OK commands: help \| status \| start \| stop \| fault \| rate <imu_hz> <slow_hz>` |
+| `status` | `OK uptime_ms=<u32> mode=<IDLE\|RUN\|CAL> imu_hz=<u16> slow_hz=<u16> last_sample_ms=<u32> fault_warn_events=<u32> cal=<0\|1>` |
 | `start` | `OK mode=RUN` |
 | `stop` | `OK mode=IDLE` |
+| `fault` | `OK faults=<count>` followed by `FLT t_ms=<u32> code=<int> sev=<int> detail=<str>` per entry |
+| `rate <imu_hz> <slow_hz>` | `OK imu_hz=<u16> slow_hz=<u16>` |
 
 Unknown verb:
 

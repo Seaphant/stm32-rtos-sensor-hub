@@ -1,0 +1,27 @@
+name: Firmware Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ARM GCC toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi
+
+      - name: Build firmware
+        working-directory: firmware
+        run: make all GCC_ARM_NONE_EABI_PATH=/usr
+
+      - name: Print firmware size
+        working-directory: firmware
+        run: arm-none-eabi-size build/sensor-hub.elf

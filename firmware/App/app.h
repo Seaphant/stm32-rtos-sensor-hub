@@ -20,6 +20,7 @@ void app_init_early(void);
 void app_rtos_create_tasks(void);
 
 void app_set_mode(app_state_t mode);
+void app_set_rates(uint16_t imu_hz, uint16_t slow_hz);
 void app_get_status(app_status_t *out);
 
 #endif /* APP_H */

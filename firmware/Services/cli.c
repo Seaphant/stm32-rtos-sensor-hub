@@ -29,7 +29,7 @@ static void line_reset(void)
 
 static void print_help(void)
 {
-    LOG_LINE("OK commands: help | status | start | stop");
+    LOG_LINE("OK commands: help | status | start | stop | fault | rate <imu_hz> <slow_hz>");
 }
 
 static void print_status(void)
@@ -87,6 +87,38 @@ static void handle_line(const char *line)
     if (strcmp(buf, "stop") == 0) {
         app_set_mode(APP_STATE_IDLE);
         LOG_LINE("OK mode=IDLE");
+        return;
+    }
+    if (strcmp(buf, "fault") == 0) {
+        fault_record_t records[8];
+        uint32_t n = fault_snapshot(records, 8U);
+        if (n == 0U) {
+            LOG_LINE("OK faults=0");
+            return;
+        }
+        LOG_LINE("OK faults=%lu", (unsigned long)n);
+        for (uint32_t i = 0U; i < n; i++) {
+            LOG_LINE("  FLT t_ms=%lu code=%d sev=%d detail=%s",
+                     (unsigned long)records[i].t_ms,
+                     (int)records[i].code,
+                     (int)records[i].severity,
+                     records[i].detail);
+        }
+        return;
+    }
+    if (strncmp(buf, "rate ", 5) == 0) {
+        unsigned int imu = 0U, slow = 0U;
+        const char *args = buf + 5;
+        while (*args == ' ') args++;
+        while (*args >= '0' && *args <= '9') { imu = imu * 10U + (unsigned)(*args - '0'); args++; }
+        while (*args == ' ') args++;
+        while (*args >= '0' && *args <= '9') { slow = slow * 10U + (unsigned)(*args - '0'); args++; }
+        if (imu == 0U || slow == 0U || imu > 1000U || slow > 1000U) {
+            LOG_LINE("ERR rate: usage 'rate <imu_hz 1-1000> <slow_hz 1-1000>'");
+            return;
+        }
+        app_set_rates((uint16_t)imu, (uint16_t)slow);
+        LOG_LINE("OK imu_hz=%u slow_hz=%u", imu, slow);
         return;
     }
 

@@ -16,7 +16,8 @@ This is a small embedded systems portfolio project focused on the part of firmwa
 - `app_rtos_create_tasks()` wired into `MX_FREERTOS_Init()` to create the `app`, `tlm`, and `cli` tasks
 - `printf` / `LOG_LINE` retargeted to **LPUART1** over the ST-Link virtual COM port
 - `sensor_hub` stub path that publishes deterministic sample data while real device drivers are still pending
-- RAM-backed fault log for queue drops and CLI line overflow
+- RAM-backed fault log for queue drops and CLI line overflow, inspectable via `fault` CLI command
+- `rate` CLI command for runtime adjustment of IMU/slow sampling rates
 - After regenerating the Cube project, use [`firmware/PASTE_AFTER_CUBE_GENERATION.txt`](firmware/PASTE_AFTER_CUBE_GENERATION.txt) for the exact `USER CODE` snippets and linker paths
 
 ## Hardware platform
@@ -55,9 +56,13 @@ Example CLI session:
 
 ```text
 help
-OK commands: help | status | start | stop
+OK commands: help | status | start | stop | fault | rate <imu_hz> <slow_hz>
 start
 OK mode=RUN
+fault
+OK faults=0
+rate 50 5
+OK imu_hz=50 slow_hz=5
 ```
 
 Example telemetry line:
@@ -70,6 +75,7 @@ TLM seq=0 t_ms=120 imu_ax_mg=0 imu_ay_mg=0 imu_az_mg=1000 gx_mdps=0 gy_mdps=0 gz
 
 - Current baseline: committed Cube/HAL/FreeRTOS project plus working application/task wiring
 - Validation evidence in the repo: source layout, `.ioc`, linker script, Makefile, UART protocol docs, and a manual smoke-test plan
+- GitHub Actions CI (ARM GCC build on every push)
 - Still pending: real LSM6DSO / TMP117 / INA219 drivers, WHO_AM_I checks, fault-on-wire reporting, watchdog policy, and calibration persistence
 
 ## Build / flash
